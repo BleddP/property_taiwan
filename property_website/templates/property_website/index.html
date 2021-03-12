@@ -1,11 +1,73 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'property/styles.css' %}"
+    />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100&display=swap"
+      rel="stylesheet"
+    />
+
     <title>Welcome</title>
   </head>
   <body>
-    <h1>Welcome</h1>
+    <div class="container">
+      <div class="row">
+        <h1>
+          台灣之家
+          <img
+            src="https://static.thenounproject.com/png/921432-200.png"
+            alt="house"
+            height="100"
+          />
+        </h1>
+      </div>
+      <div class="header-image">
+        <div class="search-form">
+          <p>住哪裡?</p>
+        </div>
+      </div>
+      <div>
+        <h4>最美麗的</h4>
+      </div>
+      <div class="row">
+        {% for property in properties %}
+        <div class="col s12 m3">
+          <div class="card">
+            <div class="card-image">
+              <img
+                src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1650&q=80"
+              />
+              <span class="card-title">{{ property.address_line_1 }}</span>
+            </div>
+            <div class="card-content">
+              <p>
+                I am a very simple card. I am good at containing small bits of
+                information. I am convenient because I require little markup to
+                use effectively.
+              </p>
+            </div>
+            <div class="card-action">
+              <a href="#">This is a link</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   </body>
 </html>
