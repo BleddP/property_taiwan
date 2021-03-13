@@ -1,17 +1,26 @@
 from django.db import models
 
 # Create your models here.
-class Agent(models.Model):
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
-    email = models.CharField(max_length=30)
-    phone = models.CharField(max_length=25)
-    line = models.CharField(max_length=25, blank=True)
-    whatsapp = models.CharField(max_length=25, blank=True)
-    wechat = models.CharField(max_length=25, blank=True)
-    skype = models.CharField(max_length=25, blank=True)
-    agency = models.CharField(max_length=30)
-    experience = models.IntegerField()
+class AccountManager(models.Model):
+    account_manager_employee_id: models.CharField(max_length=10)
+    account_manager_first_name: models.CharField(max_length=15)
+    account_manager_last_name: models.CharField(max_length=30)
+    account_manager_email: models.CharField(max_length=30)
+    account_manager_phone: models.IntegerField()
+    account_manager_clients: models.ForeignKey("RealEstateAgency", on_delete=models.CASCADE, null=True, blank=True)
+    account_manager_join_date: models.DateField()
+    account_manager_total_revenue: models.IntegerField()
+    account_manager_this_year_revenue: models.IntegerField()
+    account_manager_last_year_revenue: models.IntegerField()
+    account_manager_last_quarter_revenue: models.IntegerField()
+    account_manager_last_week_revenue: models.IntegerField()
+
+    def __str__(self):
+        return f'{self.account_manager_first_name} {self.account_manager_last_name}'
+
+
+class RealEstateAgency(models.Model):
+    real_estate_agency_name: models.CharField(max_length=30)
     address_line_1 = models.CharField(max_length=30)
     address_line_2 = models.CharField(max_length=30, blank=True)
     address_line_3 = models.CharField(max_length=30, blank=True)
@@ -21,8 +30,50 @@ class Agent(models.Model):
     latitude = models.CharField(max_length=30, blank=True)
     longitude = models.CharField(max_length=30, blank=True)
     website = models.CharField(max_length=30, blank=True)
+    phone = models.IntegerField()
+    email = models.CharField(max_length=30)
+    account_manager = models.ForeignKey("AccountManager", on_delete=models.CASCADE, null=True, blank=True)
+    agents = models.ForeignKey("Agent", on_delete=models.CASCADE, null=True, blank=True)
+    properties = models.ForeignKey("Property", on_delete=models.CASCADE, null=True, blank=True)
+    MEMBERSHIP_LEVELS = (
+        ('Standard', 'Standard'),
+        ('Professional', 'Professional'),
+        ('Expert', 'Expert'),
+    )
+    membership_level = models.CharField(max_length=30, choices=MEMBERSHIP_LEVELS, default='standard')
+    joined_date = models.DateField()
+    subscription_expiry = models.DateField()
+    blacklisted = models.BooleanField(default=False)
+    featured = models.BooleanField(default=False)
+    industry_affiliations = models.CharField(max_length=30, blank=True)
+
+    def __str__(self):
+        return f'{self.agency_name}'
+
+class Agent(models.Model):
+    first_name = models.CharField(max_length=20)
+    last_name = models.CharField(max_length=20)
+    email = models.CharField(max_length=30)
+    phone = models.CharField(max_length=25)
+    line = models.CharField(max_length=25, blank=True)
+    whatsapp = models.CharField(max_length=25, blank=True)
+    wechat = models.CharField(max_length=25, blank=True)
+    skype = models.CharField(max_length=25, blank=True)
+    agency = models.ForeignKey("RealEstateAgency", on_delete=models.CASCADE)
+    experience = models.IntegerField()
+    address_line_1 = models.CharField(max_length=30)
+    address_line_2 = models.CharField(max_length=30, blank=True)
+    address_line_3 = models.CharField(max_length=30, blank=True)
+    postcode = models.CharField(max_length=30)
+    area = models.ForeignKey("Area", on_delete=models.CASCADE, blank=True, null=True)
+    city = models.ForeignKey("City", on_delete=models.CASCADE)
+    latitude = models.CharField(max_length=30, blank=True)
+    longitude = models.CharField(max_length=30, blank=True)
+    website = models.CharField(max_length=30, blank=True)
     properties = models.ForeignKey("Property", on_delete=models.CASCADE, related_name='agencies', blank=True, null=True)
     industry_affiliations = models.CharField(max_length=30, blank=True)
+    blacklisted = models.BooleanField(default=False)
+    featured = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}, {self.agency}'
@@ -35,11 +86,13 @@ class User(models.Model):
     saved_properties = models.ForeignKey("Property", on_delete=models.CASCADE, related_name="saved_properties", blank=True, null=True)
     viewed_properties = models.ForeignKey("Property", on_delete=models.CASCADE, related_name="property_history", blank=True, null=True)
     saved_agents = models.ForeignKey("Agent", on_delete=models.CASCADE, related_name="agent_history", blank=True, null=True)
+    blacklisted = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
 class Property(models.Model):
+    published = models.BooleanField(default=False)
     property_id = models.CharField(max_length=30, blank=True)
     property_available = models.BooleanField(default=False)
     property_sold = models.BooleanField(default=False)
@@ -102,9 +155,9 @@ class Property(models.Model):
     dishwasher = models.BooleanField(default=False)
     double_lock = models.BooleanField(default=False)
     balcony = models.BooleanField(default=False)
-    balcony = models.BooleanField(default=False)
-    balcony = models.BooleanField(default=False)
-    balcony = models.BooleanField(default=False)
+    washing_machine = models.BooleanField(default=False)
+    free_windows = models.BooleanField(default=False)
+    internet = models.BooleanField(default=False)
     floorplan = models.CharField(max_length=100, blank=True)
     avatar = models.CharField(max_length=100, blank=True)
     images = models.CharField(max_length=100, blank=True)
@@ -115,6 +168,7 @@ class Property(models.Model):
     average_increase_last_five_years = models.IntegerField(blank=True, null=True)
     estimated_rent = models.IntegerField(blank=True, null=True)
     estimated_yield_pct = models.IntegerField(blank=True, null=True)
+    featured = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.address_line_1}, {self.area}'
@@ -122,19 +176,26 @@ class Property(models.Model):
 class Station(models.Model):
     station_id = models.IntegerField()
     station_name = models.CharField(max_length=30)
+    latitude = models.CharField(max_length=30, blank=True)
+    longitude = models.CharField(max_length=30, blank=True)
     train_lines = models.CharField(max_length=30)
     nearby_bus_stations = models.CharField(max_length=30)
+    area = models.ForeignKey("Area", on_delete=models.CASCADE, blank=True, null=True)
     city = models.ForeignKey("City", on_delete=models.CASCADE, blank=True, null=True)
     nearby_properties = models.ForeignKey("Property", on_delete=models.CASCADE, related_name="area_properties", blank=True, null=True)
     nearby_agents = models.ForeignKey("Agent", on_delete=models.CASCADE, related_name="area_agents", blank=True, null=True)
 
     def __str__(self):
-        return f'{self.station_name}'
+        return f'{self.station_name}, {self.city}'
 
 class School(models.Model):
     school_id = models.IntegerField()
     school_name = models.CharField(max_length=30)
     school_type = models.CharField(max_length=30)
+    area = models.ForeignKey("Area", on_delete=models.CASCADE, blank=True, null=True)
+    city = models.ForeignKey("City", on_delete=models.CASCADE, blank=True, null=True)
+    latitude = models.CharField(max_length=30, blank=True)
+    longitude = models.CharField(max_length=30, blank=True)
     train_lines = models.CharField(max_length=30)
     nearby_bus_stations = models.CharField(max_length=30)
     nearby_properties = models.ForeignKey("Property", on_delete=models.CASCADE, related_name="school_area_properties", blank=True, null=True)
@@ -149,8 +210,8 @@ class City(models.Model):
     city_id = models.IntegerField()
     city_name = models.CharField(max_length=30)
     country = models.CharField(max_length=30)
-    nearby_properties = models.ForeignKey("Property", on_delete=models.CASCADE, related_name="city_properties", blank=True, null=True)
-    nearby_agents = models.ForeignKey("Agent", on_delete=models.CASCADE, related_name="city_agencies", blank=True, null=True)
+    properties = models.ForeignKey("Property", on_delete=models.CASCADE, related_name="city_properties", blank=True, null=True)
+    agencies = models.ForeignKey("RealEstateAgency", on_delete=models.CASCADE, related_name="city_agencies", blank=True, null=True)
     average_property_price = models.IntegerField()
 
     def __str__(self):
@@ -161,6 +222,8 @@ class Area(models.Model):
     area_id = models.IntegerField()
     area_name = models.CharField(max_length=30)
     city = models.ForeignKey("City", on_delete=models.CASCADE)
+    latitude = models.CharField(max_length=30, blank=True)
+    longitude = models.CharField(max_length=30, blank=True)
     nearby_properties = models.ForeignKey("Property", on_delete=models.CASCADE, related_name="neighbourhood_properties", blank=True, null=True)
     nearby_agents = models.ForeignKey("Agent", on_delete=models.CASCADE, related_name="neighbourhood_agencies", blank=True, null=True)
     nearby_schools = models.ForeignKey("School", on_delete=models.CASCADE, related_name="neighbourhood_schools", blank=True, null=True)

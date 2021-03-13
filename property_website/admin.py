@@ -1,7 +1,9 @@
 from django.contrib import admin
-from .models import Agent, User, Property, Station, School, City, Area, PropertyType
+from .models import AccountManager, RealEstateAgency, Agent, User, Property, Station, School, City, Area, PropertyType
 
 # Register your models here.
+admin.site.register(AccountManager)
+admin.site.register(RealEstateAgency)
 admin.site.register(Agent)
 admin.site.register(User)
 admin.site.register(Property)
